@@ -1,0 +1,13 @@
+node_modules/
+dist/
+coverage/
+*.log
+
+# WXT build output and generated types
+extension/.output/
+extension/.wxt/
+
+# Secrets
+.env
+.env.*
+!.env.example

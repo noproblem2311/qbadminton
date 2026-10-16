@@ -1,0 +1,74 @@
+# Production stack on this machine. Public traffic arrives through the existing
+# Cloudflare Tunnel: qbadminton.quanphung.space -> http://localhost:8082 (web).
+name: qbadminton
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-qbadminton}
+      POSTGRES_USER: ${POSTGRES_USER:-qbadminton}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+    volumes:
+      - qbadminton-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    # No published ports: only reachable from the internal network.
+    networks: [internal]
+
+  backend:
+    build: ./backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      HOST: 0.0.0.0
+      PORT: 3000
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      DATABASE_URL: postgres://${POSTGRES_USER:-qbadminton}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-qbadminton}
+      RUN_MIGRATIONS: "true"
+      INGEST_API_KEY: ${INGEST_API_KEY:?Set INGEST_API_KEY in .env}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      CLAUDE_MODEL: ${CLAUDE_MODEL:-claude-haiku-5-5}
+      WORKER_CONCURRENCY: ${WORKER_CONCURRENCY:-2}
+      JOB_MAX_ATTEMPTS: ${JOB_MAX_ATTEMPTS:-5}
+      CLEANUP_ENABLED: ${CLEANUP_ENABLED:-true}
+      CLEANUP_RETENTION_DAYS: ${CLEANUP_RETENTION_DAYS:-2}
+      CLEANUP_INTERVAL_HOURS: ${CLEANUP_INTERVAL_HOURS:-48}
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    # Not published: nginx in `web` proxies /api and /health to it.
+    networks: [internal]
+
+  web:
+    build: ./frontend
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      # Loopback only; cloudflared on this host forwards the public hostname here.
+      - "127.0.0.1:${WEB_PORT:-8082}:80"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1/healthz"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+    networks: [internal]
+
+networks:
+  internal:
+
+volumes:
+  qbadminton-postgres-data:
+    name: qbadminton-postgres-data

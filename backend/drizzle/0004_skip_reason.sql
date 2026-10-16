@@ -1,0 +1,1 @@
+ALTER TABLE "raw_posts" ADD COLUMN "skip_reason" text;

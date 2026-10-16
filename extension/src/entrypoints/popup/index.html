@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>QBadminton Tracker</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <header class="top">
+      <strong class="brand">🏸 QBadminton Tracker</strong>
+      <span id="backend-badge" class="badge" title="Kết nối máy chủ">Đang kiểm tra…</span>
+    </header>
+
+    <section class="card">
+      <div class="row">
+        <span class="label">Trạng thái</span>
+        <span id="status" class="status">—</span>
+      </div>
+      <div class="row stack">
+        <span class="label">Nhóm trong tab này</span>
+        <a id="group-url" target="_blank" rel="noopener noreferrer">—</a>
+      </div>
+      <p id="tab-hint" class="hint" hidden></p>
+
+      <div class="actions">
+        <button id="start-btn" class="primary" type="button">Bắt đầu theo dõi</button>
+        <button id="stop-btn" class="danger" type="button">Dừng</button>
+      </div>
+
+      <label class="row">
+        <span class="label">Làm mới mỗi</span>
+        <span><input id="interval" type="number" min="1" max="60" step="1" /> phút</span>
+      </label>
+
+      <dl class="stats">
+        <div><dt>Lần quét cuối</dt><dd id="last-scan">—</dd></div>
+        <div><dt>Lần làm mới cuối</dt><dd id="last-refresh">—</dd></div>
+        <div><dt>Đã trích xuất</dt><dd id="extracted">0</dd></div>
+        <div><dt>Đã gửi thành công</dt><dd id="submitted">0</dd></div>
+        <div><dt>Đang chờ gửi</dt><dd id="queue">0</dd></div>
+        <div><dt>Thử gửi lại lúc</dt><dd id="next-retry">—</dd></div>
+      </dl>
+
+      <p id="last-error" class="error" hidden></p>
+      <button id="sort-btn" class="link" type="button" hidden>Chuyển nhóm sang sắp xếp “Bài viết mới”</button>
+    </section>
+
+    <details class="card" id="settings">
+      <summary>Cài đặt kết nối</summary>
+      <label class="field">
+        <span>Backend URL</span>
+        <input id="backend-url" type="url" placeholder="http://localhost:8082" spellcheck="false" />
+      </label>
+      <label class="field">
+        <span>API key</span>
+        <input id="api-key" type="password" autocomplete="off" spellcheck="false" />
+      </label>
+      <div class="actions">
+        <button id="save-btn" class="primary" type="button">Lưu</button>
+        <button id="check-btn" type="button">Kiểm tra kết nối</button>
+      </div>
+      <p id="settings-msg" class="hint"></p>
+    </details>
+
+    <footer id="footer" class="hint"></footer>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

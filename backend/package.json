@@ -1,0 +1,37 @@
+{
+  "name": "qbadminton-backend",
+  "version": "0.1.0",
+  "scripts": {
+    "dev": "tsx watch --env-file-if-exists=.env src/server.ts",
+    "build": "tsc -p tsconfig.build.json",
+    "start": "node dist/server.js",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "tsx --env-file-if-exists=.env src/database/migrate.ts",
+    "jobs:requeue-failed": "tsx --env-file-if-exists=.env src/jobs/requeue-failed.ts",
+    "levels:rebuild": "tsx --env-file-if-exists=.env src/jobs/rebuild-levels.ts",
+    "cleanup:run": "tsx --env-file-if-exists=.env src/jobs/cleanup-old-data.ts"
+  },
+  "type": "module",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.134.0",
+    "drizzle-orm": "^0.44.7",
+    "fastify": "^5.12.7",
+    "pg": "^8.23.1",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "^0.5.10",
+    "@types/node": "^24.19.2",
+    "@types/pg": "^8.23.1",
+    "drizzle-kit": "^0.31.11",
+    "tsx": "^4.23.15",
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.7"
+  },
+  "private": true,
+  "engines": {
+    "node": ">=22.9"
+  }
+}
